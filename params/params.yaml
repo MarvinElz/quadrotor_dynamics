@@ -1,0 +1,9 @@
+Dynamics: 
+  m: 0.65 
+  Ix: 2
+  Iy: 2
+  Iz: 5
+  L:  0.2
+  Axx: 2
+  Ayy: 2
+  Azz: 5

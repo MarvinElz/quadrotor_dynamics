@@ -8,7 +8,6 @@ find_package(catkin REQUIRED COMPONENTS
   quadrotor_control
   roscpp
   std_msgs
-  roslaunch
 )
 
 ## System dependencies are found with CMake's conventions
