@@ -1,9 +1,10 @@
 Dynamics: 
   m: 0.65 
-  Ix: 2
-  Iy: 2
-  Iz: 5
+  g: 9.81
+  Ix: 7.5e-3
+  Iy: 7.5e-3
+  Iz: 1.3e-2
   L:  0.2
-  Axx: 2
-  Ayy: 2
-  Azz: 5
+  Axx: 0.3
+  Ayy: 0.3
+  Azz: 1
