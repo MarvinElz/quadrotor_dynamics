@@ -29,7 +29,7 @@ ros::Publisher pub_Pos;
 
 void callback_manipulated_variables( const quadrotor_control::manipulated_variables::Ptr& msg )
 {    
-  ROS_INFO("Dynamics: Callback_manipulated_variables");
+  //ROS_INFO("Dynamics: Callback_manipulated_variables");
   U[0] = msg->U[0];
   U[1] = msg->U[1];
   U[2] = msg->U[2];  
@@ -43,7 +43,7 @@ tf::Vector3 calcWindInfluence( ){
   // es gibt timesTranspose(Matrix) und TransposeTimes(Matrix) -> nochmal checken
   tf::Matrix3x3 R_BN = R_NB.transpose();
   tf::Vector3 windInfl = ( deltaV.length()/m ) * (R_NB * A_T * R_BN * deltaV);
-  ROS_INFO("WindInfluence: %f, %f, %f", windInfl.getX(), windInfl.getY(), windInfl.getZ());
+  //ROS_INFO("WindInfluence: %f, %f, %f", windInfl.getX(), windInfl.getY(), windInfl.getZ());
   return windInfl;
 }
 
@@ -55,10 +55,11 @@ void Berechne_Zustandsgroessen(){
   double a1 = cos(X[6])*sin(X[7])*cos(X[8]);
   double a2 = sin(X[6])*sin(X[8]);
   double a3 = cos(X[6])*sin(X[7])*sin(X[8]);
-  double a4 = cos(X[6])*cos(X[7]);
+  double a4 = sin(X[6])*cos(X[8]);
+  double a5 = cos(X[6])*cos(X[7]);
   double c1 = U[0]/m;
   X_dot[3] =   -c1*( a1+a2 ) - windInfluence.getX();
-  X_dot[4] =   -c1*( a3-a2 ) - windInfluence.getY();
+  X_dot[4] =   -c1*( a3-a4 ) - windInfluence.getY();
   X_dot[5] = g -c1*( a4 )    - windInfluence.getZ();
   X_dot[6] = X[9];
   X_dot[7] = X[10];
@@ -69,21 +70,22 @@ void Berechne_Zustandsgroessen(){
 }
 
 void Berechne_Ausgangsgroessen( double dt ){
-  ROS_INFO( "Dynamics: dt = %f", dt );
-  ROS_INFO( "Ax: %f, Ay: %f, Az: %f", X_dot[3], X_dot[4], X_dot[5] );
+  //ROS_INFO( "Dynamics: dt = %f", dt );
+  //ROS_INFO( "Ax: %f, Ay: %f, Az: %f", X_dot[3], X_dot[4], X_dot[5] );
   X[0] += dt * X_dot[0];
   X[1] += dt * X_dot[1];
   X[2] += dt * X_dot[2];
   X[3] += dt * X_dot[3];
   X[4] += dt * X_dot[4];
   X[5] += dt * X_dot[5];
-  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f", X[3], X[4], X[5] );
+  
   X[6] += dt * X_dot[6];
   X[7] += dt * X_dot[7];
   X[8] += dt * X_dot[8];
   X[9] += dt * X_dot[9];
   X[10] += dt * X_dot[10];
   X[11] += dt * X_dot[11];
+  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Psi: %f", X[3], X[4], X[5], X[11], X[8] );
 }
 
 
@@ -95,7 +97,7 @@ bool propagate( std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp )
    ros::Duration dt = now - last_Prop;
    Berechne_Ausgangsgroessen(dt.toSec());   
    last_Prop = now;
-   ROS_INFO( "Position: %f, %f, %f", X[0], X[1], X[2] );
+   //ROS_INFO( "Position: %f, %f, %f", X[0], X[1], X[2] );
 
    #ifdef DIRECT_LOOPBACK
       geometry_msgs::Twist vel;
@@ -147,7 +149,7 @@ int main( int argc, char * argv[] ){
    calcConstants(nh);
    last_Prop = ros::Time::now();   
 
-   ros::Subscriber sub = nh.subscribe("/stellgroessen", 10, callback_manipulated_variables);
+   ros::Subscriber sub = nh.subscribe("/stellgroessen", 100, callback_manipulated_variables);
 
    #ifdef DIRECT_LOOPBACK
       pub_Vel = nh.advertise<geometry_msgs::Twist>("/vel_measure", 100);
