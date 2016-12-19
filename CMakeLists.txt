@@ -4,10 +4,10 @@ project(quadrotor_dynamics)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS
-  quadrotor_control
+find_package(catkin REQUIRED COMPONENTS  
   roscpp
   std_msgs
+  quadrotor_control
   roslaunch
 )
 
@@ -190,4 +190,4 @@ include_directories(
 
 add_executable( Dynamics src/Dynamics.cpp)
 target_link_libraries(Dynamics ${catkin_LIBRARIES})
-add_dependencies( Dynamics quadrotor_control)
+add_dependencies( Dynamics std_msgs quadrotor_control ${quadrotor_control_EXPORTED_TARGETS})
