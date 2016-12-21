@@ -8,7 +8,13 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   quadrotor_control
+  dynamic_reconfigure
   roslaunch
+)
+
+## Dynamic Parameter
+generate_dynamic_reconfigure_options(
+  cfg/Wind.cfg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -188,6 +194,11 @@ include_directories(
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
 
+
+
 add_executable( Dynamics src/Dynamics.cpp)
 target_link_libraries(Dynamics ${catkin_LIBRARIES})
-add_dependencies( Dynamics std_msgs quadrotor_control ${quadrotor_control_EXPORTED_TARGETS})
+add_dependencies( Dynamics std_msgs quadrotor_control ${quadrotor_control_EXPORTED_TARGETS} ${quadrotor_dynamics}_gencfg)
+
+
+

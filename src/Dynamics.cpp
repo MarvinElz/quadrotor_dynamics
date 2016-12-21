@@ -1,4 +1,8 @@
 #include "ros/ros.h"
+
+#include <dynamic_reconfigure/server.h>
+#include <quadrotor_dynamics/WindConfig.h>
+
 #include "quadrotor_control/manipulated_variables.h"
 #include "std_srvs/Empty.h"
 #include "std_srvs/SetBool.h"
@@ -28,11 +32,10 @@ ros::Publisher pub_Vel;
 ros::Publisher pub_Pos;
 #endif
 
-
-void callback_wind_direction( const geometry_msgs::Vector3::Ptr& msg ){
-	U[4] = msg->x;
-	U[5] = msg->y;
-	U[6] = msg->z;
+void callbackSetWind(quadrotor_dynamics::WindConfig &config, uint32_t level) {	
+	U[4] = config.WindX; 
+	U[5] = config.WindY; 
+	U[6] = config.WindZ;
 	ROS_INFO( "Wind-Direction: %f, %f, %f", U[4], U[5], U[6] );
 }
 
@@ -162,7 +165,11 @@ int main( int argc, char * argv[] ){
    	calcConstants(nh);
    	last_Prop = ros::Time::now();   
 
-	ros::Subscriber sub_wind  = nh.subscribe( "/wind", 10, callback_wind_direction );
+	dynamic_reconfigure::Server<quadrotor_dynamics::WindConfig> server;
+	dynamic_reconfigure::Server<quadrotor_dynamics::WindConfig>::CallbackType f;
+	f = boost::bind(&callbackSetWind, _1, _2);
+	server.setCallback(f);
+
    	ros::Subscriber sub_stell = nh.subscribe("/stellgroessen", 10, callback_manipulated_variables);
 
    	#ifdef DIRECT_LOOPBACK
