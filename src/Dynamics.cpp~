@@ -8,11 +8,12 @@
 #include "std_srvs/SetBool.h"
 
 #define DIRECT_LOOPBACK
-#ifdef DIRECT_LOOPBACK
+
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Twist.h"
 #include "quadrotor_control/pose.h"
-#endif
+
+#include "quadrotor_control/kinematics.h"
 
 #include <tf/LinearMath/Matrix3x3.h>
 #include <tf/LinearMath/Vector3.h>
@@ -27,12 +28,9 @@ double C[6] = {0, 0, 0, 0, 0, 0};
 tf::Matrix3x3 A_T;
 ros::Time last_Prop; 
 
-#ifdef DIRECT_LOOPBACK
-ros::Publisher pub_Vel;
-ros::Publisher pub_Pos;
-#endif
+ros::Publisher pub_Kin;
 
-void callback(quadrotor_dynamics::WindConfig &config, uint32_t level) {	
+void callbackSetWind(quadrotor_dynamics::WindConfig &config, uint32_t level) {	
 	U[4] = config.WindX; 
 	U[5] = config.WindY; 
 	U[6] = config.WindZ;
@@ -97,7 +95,7 @@ void Berechne_Ausgangsgroessen( const double dt, const double *X_dot ){
   X[9] += dt * X_dot[9];
   X[10] += dt * X_dot[10];
   X[11] += dt * X_dot[11];
-  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[6], X[7], X[8] );
+  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[2] , X[6], X[7], X[8] );
 }
 
 
@@ -115,25 +113,25 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
    	last_Prop = now;
    	//ROS_INFO( "Position: %f, %f, %f", X[0], X[1], X[2] );
 
-   	#ifdef DIRECT_LOOPBACK
-      	geometry_msgs::Twist vel;
-      	vel.linear.x = X[3];
-      	vel.linear.y = X[4];
-      	vel.linear.z = X[5];
-      	vel.angular.x= X[9];
-      	vel.angular.y= X[10];
-      	vel.angular.z= X[11];
-      	pub_Vel.publish(vel);
+	quadrotor_control::kinematics k;
 
-      	quadrotor_control::pose pos;
-      	pos.position.x = X[0];
-      	pos.position.y = X[1];
-      	pos.position.z = X[2];
-      	pos.orientation.x = X[6];
-      	pos.orientation.y = X[7];
-      	pos.orientation.z = X[8];
-      	pub_Pos.publish(pos);
-   	#endif
+   	//geometry_msgs::Twist vel;
+      	k.vel.linear.x = X[3];
+      	k.vel.linear.y = X[4];
+      	k.vel.linear.z = X[5];
+      	k.vel.angular.x= X[9];
+      	k.vel.angular.y= X[10];
+      	k.vel.angular.z= X[11];
+      	//pub_Vel.publish(vel);
+
+      	//quadrotor_control::pose pos;
+      	k.pose.position.x = X[0];
+      	k.pose.position.y = X[1];
+      	k.pose.position.z = X[2];
+      	k.pose.orientation.x = X[6];
+      	k.pose.orientation.y = X[7];
+      	k.pose.orientation.z = X[8];
+      	pub_Kin.publish(k);
    	return true;
 }
 
@@ -165,17 +163,24 @@ int main( int argc, char * argv[] ){
    	calcConstants(nh);
    	last_Prop = ros::Time::now();   
 
+	#ifdef DIRECT_LOOPBACK
+	ROS_INFO("Nutze direkte Rückführung an Regelung");
+	#else
+	ROS_INFO("Nutze youbot");
+	#endif
+
 	dynamic_reconfigure::Server<quadrotor_dynamics::WindConfig> server;
 	dynamic_reconfigure::Server<quadrotor_dynamics::WindConfig>::CallbackType f;
-	f = boost::bind(&callback, _1, _2);
+	f = boost::bind(&callbackSetWind, _1, _2);
 	server.setCallback(f);
 
    	ros::Subscriber sub_stell = nh.subscribe("/stellgroessen", 10, callback_manipulated_variables);
 
    	#ifdef DIRECT_LOOPBACK
-      	pub_Vel = nh.advertise<geometry_msgs::Twist>("/vel_measure", 10);
-      	pub_Pos = nh.advertise<quadrotor_control::pose>("/pose_measure", 10); 
-   	#endif
+      	pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_measure", 10);
+   	#else
+	pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_model", 10);
+	#endif
    
    	ros::ServiceServer service = nh.advertiseService("dynamics_prop", propagate);
    	ROS_INFO( "Dynamics Init done" );
