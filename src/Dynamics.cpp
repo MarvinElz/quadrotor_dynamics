@@ -108,8 +108,11 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
 
    	Berechne_Zustandsgroessen( X_dot );
    	ros::Time now = ros::Time::now();
-   	ros::Duration dt = now - last_Prop;
-   	Berechne_Ausgangsgroessen(dt.toSec(), X_dot);   
+   	double dt = (now - last_Prop).toSec();
+
+	dt = 0.005;								// konstante Schrittweite
+
+   	Berechne_Ausgangsgroessen(dt, X_dot);   
    	last_Prop = now;
    	//ROS_INFO( "Position: %f, %f, %f", X[0], X[1], X[2] );
 
