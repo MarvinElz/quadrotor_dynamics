@@ -98,7 +98,14 @@ void Berechne_Ausgangsgroessen( const double dt, const double *X_dot ){
   ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[2], X[6], X[7], X[8] );
 }
 
-
+bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp )
+{
+	ROS_INFO("Reset Position");
+	X[0] = 0.0;
+	X[1] = 0.0;
+	X[2] = -1.784;
+	return true;
+}
 
 bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& resp )
 {
@@ -110,7 +117,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
    	ros::Time now = ros::Time::now();
    	double dt = (now - last_Prop).toSec();
 
-	dt = 0.005;								// konstante Schrittweite
+	dt = 0.001;								// konstante Schrittweite
 
    	Berechne_Ausgangsgroessen(dt, X_dot);   
    	last_Prop = now;
@@ -185,7 +192,8 @@ int main( int argc, char * argv[] ){
 	pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_model", 10);
 	#endif
    
-   	ros::ServiceServer service = nh.advertiseService("dynamics_prop", propagate);
+   	ros::ServiceServer srv_prop = nh.advertiseService("dynamics_prop", propagate);
+	ros::ServiceServer srv_reset = nh.advertiseService("dynamics_resetPosition", resetPosition);
    	ROS_INFO( "Dynamics Init done" );
 
    	ros::spin();
