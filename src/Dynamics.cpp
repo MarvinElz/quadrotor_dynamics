@@ -103,7 +103,8 @@ void Berechne_Ausgangsgroessen( const double dt, const double *X_dot ){
   X[9] += dt * X_dot[9];
   X[10] += dt * X_dot[10];
   X[11] += dt * X_dot[11];
-  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[2], X[6], X[7], X[8] );
+	ROS_INFO("%f", simTime);
+  //ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[2], X[6], X[7], X[8] );
 	logFile << simTime << "," << X[3] << "," << X[5] << "," << X[11] << std::endl; 
 }
 
