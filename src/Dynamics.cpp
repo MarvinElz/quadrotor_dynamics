@@ -13,6 +13,9 @@
 #include "geometry_msgs/Twist.h"
 #include "quadrotor_control/pose.h"
 
+#include <fstream>
+using namespace std;
+
 #include "quadrotor_control/kinematics.h"
 
 #include <tf/LinearMath/Matrix3x3.h>
@@ -27,6 +30,10 @@ double U[7] = {7, 0, 0, 0, 0, 2, 0};
 double C[6] = {0, 0, 0, 0, 0, 0};
 tf::Matrix3x3 A_T;
 ros::Time last_Prop; 
+
+double simTime = 0;
+
+ofstream logFile;
 
 ros::Publisher pub_Kin;
 
@@ -82,6 +89,7 @@ void Berechne_Zustandsgroessen(double *X_dot){
 void Berechne_Ausgangsgroessen( const double dt, const double *X_dot ){
   //ROS_INFO( "Dynamics: dt = %f", dt );
   //ROS_INFO( "Ax: %f, Ay: %f, Az: %f", X_dot[3], X_dot[4], X_dot[5] );
+	simTime += dt;
   X[0] += dt * X_dot[0];
   X[1] += dt * X_dot[1];
   X[2] += dt * X_dot[2];
@@ -96,6 +104,7 @@ void Berechne_Ausgangsgroessen( const double dt, const double *X_dot ){
   X[10] += dt * X_dot[10];
   X[11] += dt * X_dot[11];
   ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", X[3], X[4], X[5], X[11], X[2], X[6], X[7], X[8] );
+	logFile << simTime << "," << X[3] << "," << X[5] << "," << X[11] << std::endl; 
 }
 
 bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& resp )
@@ -117,7 +126,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
    	ros::Time now = ros::Time::now();
    	double dt = (now - last_Prop).toSec();
 
-	dt = 0.001;								// konstante Schrittweite
+	dt = 0.005;								// konstante Schrittweite
 
    	Berechne_Ausgangsgroessen(dt, X_dot);   
    	last_Prop = now;
@@ -168,10 +177,12 @@ void calcConstants(ros::NodeHandle &nh){
 
 int main( int argc, char * argv[] ){
 
-   	ros::init(argc, argv, "Dynamics");
-   	ros::NodeHandle nh("Dynamics");
-   	calcConstants(nh);
-   	last_Prop = ros::Time::now();   
+	ros::init(argc, argv, "Dynamics");
+	ros::NodeHandle nh("Dynamics");
+	calcConstants(nh);
+	last_Prop = ros::Time::now();   
+
+	logFile.open("/home/robo/Desktop/log.txt"); 
 
 	#ifdef DIRECT_LOOPBACK
 	ROS_INFO("Nutze direkte Rückführung an Regelung");
@@ -184,20 +195,23 @@ int main( int argc, char * argv[] ){
 	f = boost::bind(&callbackSetWind, _1, _2);
 	server.setCallback(f);
 
-   	ros::Subscriber sub_stell = nh.subscribe("/stellgroessen", 10, callback_manipulated_variables);
+	ros::Subscriber sub_stell = nh.subscribe("/stellgroessen", 10, callback_manipulated_variables);
 
-   	#ifdef DIRECT_LOOPBACK
-      	pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_measure", 10);
-   	#else
-	pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_model", 10);
+	#ifdef DIRECT_LOOPBACK
+		pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_measure", 10);
+	#else
+		pub_Kin = nh.advertise<quadrotor_control::kinematics>("/kin_model", 10);
 	#endif
    
-   	ros::ServiceServer srv_prop = nh.advertiseService("dynamics_prop", propagate);
+	ros::ServiceServer srv_prop = nh.advertiseService("dynamics_prop", propagate);
 	ros::ServiceServer srv_reset = nh.advertiseService("dynamics_resetPosition", resetPosition);
-   	ROS_INFO( "Dynamics Init done" );
+	ROS_INFO( "Dynamics Init done" );
 
-   	ros::spin();
+	ros::spin();
 
-   return 0;
+	logFile.close();
+	return 0;
 }
+
+
 
