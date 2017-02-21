@@ -176,7 +176,7 @@ bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& re
 	for(int i = 0; i < 12; i++)
 		X[i] = 0;
 	// Achtung: abhängig von Skalierung in quadrotor_youbot_interface
-	X[2] = -3.34;
+	X[2] = -26.34;
 	return true;
 }
 
