@@ -179,21 +179,21 @@ bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& re
 	X[2] = -26.34;
 
 	quadrotor_control::kinematics k;
- 	k.pose.position.x = Y[0];
- 	k.pose.position.y = Y[1];
- 	k.pose.position.z = Y[2];
+ 	k.pose.position.x = X[0];
+ 	k.pose.position.y = X[1];
+ 	k.pose.position.z = X[2];
 	
- 	k.vel.linear.x = Y[3];
- 	k.vel.linear.y = Y[4];
- 	k.vel.linear.z = Y[5];
+ 	k.vel.linear.x = X[3];
+ 	k.vel.linear.y = X[4];
+ 	k.vel.linear.z = X[5];
 
- 	k.pose.orientation.x = Y[6];
- 	k.pose.orientation.y = Y[7];
- 	k.pose.orientation.z = Y[8];
+ 	k.pose.orientation.x = X[6];
+ 	k.pose.orientation.y = X[7];
+ 	k.pose.orientation.z = X[8];
 
- 	k.vel.angular.x= Y[9];
- 	k.vel.angular.y= Y[10];
- 	k.vel.angular.z= Y[11];
+ 	k.vel.angular.x= X[9];
+ 	k.vel.angular.y= X[10];
+ 	k.vel.angular.z= X[11];
  	pub_Kin.publish(k);
 	return true;
 }
