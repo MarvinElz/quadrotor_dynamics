@@ -177,6 +177,24 @@ bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& re
 		X[i] = 0;
 	// Achtung: abhängig von Skalierung in quadrotor_youbot_interface
 	X[2] = -26.34;
+
+	quadrotor_control::kinematics k;
+ 	k.pose.position.x = Y[0];
+ 	k.pose.position.y = Y[1];
+ 	k.pose.position.z = Y[2];
+	
+ 	k.vel.linear.x = Y[3];
+ 	k.vel.linear.y = Y[4];
+ 	k.vel.linear.z = Y[5];
+
+ 	k.pose.orientation.x = Y[6];
+ 	k.pose.orientation.y = Y[7];
+ 	k.pose.orientation.z = Y[8];
+
+ 	k.vel.angular.x= Y[9];
+ 	k.vel.angular.y= Y[10];
+ 	k.vel.angular.z= Y[11];
+ 	pub_Kin.publish(k);
 	return true;
 }
 
