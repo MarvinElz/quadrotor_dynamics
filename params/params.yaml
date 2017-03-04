@@ -4,6 +4,6 @@
   Iy: 7.5e-3
   Iz: 1.3e-2
   L:  0.2
-  Axx: 0.3
-  Ayy: 0.3
-  Azz: 1
+  Axx: 0.1
+  Ayy: 0.1
+  Azz: 0.2
