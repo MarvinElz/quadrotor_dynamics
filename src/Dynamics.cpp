@@ -7,7 +7,7 @@
 #include "std_srvs/Empty.h"
 #include "std_srvs/SetBool.h"
 
-//#define DIRECT_LOOPBACK
+#define DIRECT_LOOPBACK
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Twist.h"
@@ -291,12 +291,13 @@ int main( int argc, char * argv[] ){
 	last_Prop = ros::Time::now();   
 
 	#ifdef LOGGING
-		char filePathName[] = "/home/student/Schreibtisch/log.txt";
+		char filePathName[] = "/home/robo/Desktop/log.txt";
 		logFile.open(filePathName); 
 		if(!logFile.is_open()){
 			ROS_ERROR("Logfile: '%s' konnte nicht geöffnet werden. Beende.", filePathName);
 			return 0;
 		}
+		logFile << " Time ,  VX  ,  VZ  ,  ZYaw" << std::endl; 
 	#endif
 
 	// Einstellung des Windes über dynamische Parameter

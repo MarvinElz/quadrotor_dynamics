@@ -7,7 +7,7 @@
 #include "std_srvs/Empty.h"
 #include "std_srvs/SetBool.h"
 
-//#define DIRECT_LOOPBACK
+// #define DIRECT_LOOPBACK
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Twist.h"
@@ -177,6 +177,24 @@ bool resetPosition( std_srvs::Empty::Request& req, std_srvs::Empty::Response& re
 		X[i] = 0;
 	// Achtung: abhängig von Skalierung in quadrotor_youbot_interface
 	X[2] = -26.34;
+
+	quadrotor_control::kinematics k;
+ 	k.pose.position.x = X[0];
+ 	k.pose.position.y = X[1];
+ 	k.pose.position.z = X[2];
+	
+ 	k.vel.linear.x = X[3];
+ 	k.vel.linear.y = X[4];
+ 	k.vel.linear.z = X[5];
+
+ 	k.pose.orientation.x = X[6];
+ 	k.pose.orientation.y = X[7];
+ 	k.pose.orientation.z = X[8];
+
+ 	k.vel.angular.x= X[9];
+ 	k.vel.angular.y= X[10];
+ 	k.vel.angular.z= X[11];
+ 	pub_Kin.publish(k);
 	return true;
 }
 
@@ -273,12 +291,13 @@ int main( int argc, char * argv[] ){
 	last_Prop = ros::Time::now();   
 
 	#ifdef LOGGING
-		char filePathName[] = "/home/student/Schreibtisch/log.txt";
+		char filePathName[] = "/home/robo/Desktop/log.txt";
 		logFile.open(filePathName); 
 		if(!logFile.is_open()){
 			ROS_ERROR("Logfile: '%s' konnte nicht geöffnet werden. Beende.", filePathName);
 			return 0;
 		}
+		logFile << " Time ,  VX  ,  VZ  ,  ZYaw" << std::endl; 
 	#endif
 
 	// Einstellung des Windes über dynamische Parameter
