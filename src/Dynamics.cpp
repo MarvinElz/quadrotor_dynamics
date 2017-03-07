@@ -216,7 +216,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
   double dt = (now - last_Prop).toSec();
 
 	// konstante Schrittweite für Testzwecke
-	dt = 0.005;								
+	//dt = 0.005;								
 	
 	Berechne_Zustandsgroessen( X_dot );
 	
