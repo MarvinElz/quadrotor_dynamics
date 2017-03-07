@@ -7,7 +7,7 @@
 #include "std_srvs/Empty.h"
 #include "std_srvs/SetBool.h"
 
-#define DIRECT_LOOPBACK
+// #define DIRECT_LOOPBACK
 
 #include "geometry_msgs/Vector3.h"
 #include "geometry_msgs/Twist.h"
