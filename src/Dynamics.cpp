@@ -214,7 +214,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
 
 	ros::Time now = ros::Time::now();
   double dt = (now - last_Prop).toSec();
-
+	ROS_INFO("dt: %f", dt);
 	// konstante Schrittweite für Testzwecke
 	//dt = 0.005;								
 	
@@ -225,7 +225,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
 	double Y[12];
 	Berechne_Ausgangsgroessen( Y );  
 
-  ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", Y[3], Y[4], Y[5], Y[11], Y[2], Y[6], Y[7], Y[8] );
+  //ROS_INFO( "Vx: %f, Vy: %f, Vz: %f, VPsi: %f, Z: %f, Phi: %f, Theta: %f, Psi: %f", Y[3], Y[4], Y[5], Y[11], Y[2], Y[6], Y[7], Y[8] );
 	
 	#ifdef LOGGING
 		simTime += dt;
