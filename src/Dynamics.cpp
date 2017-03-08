@@ -51,6 +51,8 @@ ros::Time last_Prop;
 // Publisher für Pose- und Geschwindigkeitsdaten
 ros::Publisher pub_Kin;
 
+// maximale Schrittweite
+double dt_max = 0.005;
 
 /*
 	Servicefunktion für dynamische Paramter zum Ändern der Windrichtung/-geschwindigkeit
@@ -217,7 +219,7 @@ bool propagate( std_srvs::SetBool::Request& req, std_srvs::SetBool::Response& re
 
 	//dt = 0.005;
 //	ROS_INFO("dt: %f", dt);
-	if(dt > 0.005) dt = 0.005; 
+	if(dt > dt_max) dt = dt_max; 
 
 	// konstante Schrittweite für Testzwecke
 	//dt = 0.005;								
@@ -282,6 +284,7 @@ void calcConstants(const ros::NodeHandle &nh){
   	nh.getParam("Axx", Axx);
   	nh.getParam("Ayy", Ayy);
   	nh.getParam("Azz", Azz); 
+		nh.getParam("max_Schrittweite", dt_max);
   	A_T = tf::Matrix3x3( Axx, 0, 0, 0, Ayy, 0, 0, 0, Azz );
 }
 
